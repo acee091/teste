@@ -28,7 +28,17 @@ function operation() {
 
       if (action === 'Criar conta') {
         createAccount()
+      }else if (action === 'Depositar'){
+        deposit()   
+      }else if (action === 'Consultar Saldo'){
+        getAccountBalace()
+      }else if (action === 'Sacar'){
+        withdraw()
+      }else if (action === 'Sair'){
+        console.log(chalk.bgBlue.black('Obrigado por usar o SENAC Bank'))
+        process.exit()
       }
+
     })
     .catch((err) => console.log(err))
 }
@@ -81,3 +91,81 @@ function buildAccount() {
     .catch ((err) => console.log(err))
   } 
   
+
+  //ad an amount to user account
+
+  function deposit(){
+    inquirer
+        .prompt([
+            {
+                name: 'accountName',
+                message: 'Qual o nome da sua conta?',
+            }
+        ])
+        .then((answer) => {
+            const accountName = answer['accountName']
+            
+            if(!checkAccount(accountName)) {
+                return deposit()
+            }
+
+            inquirer
+              .prompt([
+                {
+                  name:'amount',
+                  message: 'Quanto você deseja depositar?'
+                }
+              ])
+              .then((answer) =>{
+                const amount = answer['amount']
+                addAmount(accountName, amount)
+                operation()
+              })
+        })
+  }
+
+  // verifica se conta existe
+  function checkAccount(accountName){
+    if(!fs.existsSync(`accounts/${accountName}.json`)){
+        console.log(chalk.bgRed.black('Esta conta não exite, escolha outra nome!'))
+        return false
+    }
+    return true
+  }
+
+  //função auxiliar - OBTER A QUANTIA QUE TEM NA CONTA
+  function getAccount(accountName){
+    // ver o conteudo na pasta ACCOUNTS
+    const accountJSON = fs.readFileSync(`account/${accountName}.json`,{
+    encoding:'utf-8',
+    flag:'r',
+  })
+  return JSON.parse(accountJSON)
+}
+
+// pega a quantia que ta na conta e adiciona o deposito
+function addAmount(accountName, amount){
+  // accountData = o quanto o usuario tem atualmente
+  const accountData = getAccount(accountName)
+
+  if(!amount){
+    console.log(
+      chalk.bgRed.black('Ocorreu um erro, tente mais tarde')
+      )
+  return deposit()
+  }
+
+  accountData.balance = parseFloat(amount) + parseFloat(accountData.balance)
+
+  // sobescrever a quantia antiga para a quantia atual
+  fs.writeFileSync(
+    `accounts/${accountName}.json`,
+    JSON.stringify(accountData),
+    function(err){
+      console(err)
+    }
+  )
+
+    console.log(chalk.greenBright(`Deposito realizado com sucesso! 
+    Valor R$${amount}`))
+}

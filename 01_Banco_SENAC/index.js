@@ -52,10 +52,11 @@ function createAccount() {
   console.log(chalk.bgGreen.black('Parabéns por escolher nosso banco!'))
   console.log(chalk.green('Defina as opções da sua conta a seguir'))
   
+  //função para criar a conta
   buildAccount()
 }
 
-//Criando um diretorio Accounts
+//Criando um diretorio Accounts - guardar as contas
 function buildAccount() {
   inquirer
     .prompt([
@@ -66,7 +67,6 @@ function buildAccount() {
     ])
     .then((answer) => {
       console.info(answer['accountName'])
-
       const accountName = answer['accountName']
       //incluindo diretorio Accounts(PASTA)
       if (!fs.existsSync('accounts')) {
@@ -80,7 +80,8 @@ function buildAccount() {
         buildAccount(accountName)
         return
       }
-      //Criando a conta e gravando 
+      //Se todos retornarem falso,
+      // Cria a conta e grava na pasta
       fs.writeFileSync(
         `accounts/${accountName}.json`,
         '{"balance":0}',
@@ -96,7 +97,7 @@ function buildAccount() {
   } 
   
 
-  //ad an amount to user account
+  //Depositar o dinheiro na conta
 
   function deposit(){
     inquirer
@@ -109,6 +110,8 @@ function buildAccount() {
         .then((answer) => {
             const accountName = answer['accountName']
             
+            // chama a função CHECKACCOUNT para 
+            // verificar se a conta existe
             if(!checkAccount(accountName)) {
                 return deposit()
             }
@@ -122,6 +125,7 @@ function buildAccount() {
               ])
               .then((answer) =>{
                 const amount = answer['amount']
+                // chama a função ADDAMOUNT para depositar o dinheiro na conta
                 addAmount(accountName, amount)
                 operation()
               })
@@ -131,7 +135,7 @@ function buildAccount() {
   // verifica se conta existe
   function checkAccount(accountName){
     if(!fs.existsSync(`accounts/${accountName}.json`)){
-        console.log(chalk.bgRed.black('Esta conta não exite, escolha outra nome!'))
+        console.log(chalk.bgRed.black('Esta conta não existe, escolha outra nome!'))
         return false
     }
     return true
@@ -176,6 +180,7 @@ function addAmount(accountName, amount){
 
 //finalizamos a função depositar
 
+// Verificar a quantia que tem na conta
 function getAccountBalance(){
   inquirer
     .prompt([{
